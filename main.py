@@ -40,13 +40,15 @@ class TreeBid:
                     return
                 current = current.right
 
-    def load_from_csv(self, filepath):
+    def load_from_csv(self, filepath, manche):
         with open(filepath, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                name = row['joueur']
-                price = int(row['prix'])
-                self.insert(name, price)
+                if int(row['manche']) == manche:
+                    name = row['joueur']
+                    if int(row["prix"])!=0:
+                        price = int(row['prix'])
+                        self.insert(name, price)
 
     def display2(self):
         self._inorder(self.root)
@@ -90,12 +92,22 @@ while True:
     except ValueError:
         print("Please enter a valid number.")
 
+while True:
+    try:
+        manche = int(input("Enter manche number (1-500): "))
+        if manche < 1 or manche > 500:
+            print("Please enter a number between 1 and 500.")
+            continue
+        break
+    except ValueError:
+        print("Please enter a valid number.")
+
 # --- Load from CSV ---
 bid2 = TreeBid(base_cost, alpha)
-bid2.load_from_csv(r"C:\Users\gfour\OneDrive\Desktop\pbl2\bide\APP_lowbid_data (1)\lowbid_manche_demo.csv")
+bid2.load_from_csv(r"C:\Users\gfour\OneDrive\Desktop\pbl2\bide\APP_lowbid_data (1)\lowbid_multi_manches_500x40.csv", manche)
 
 # --- Results ---
-print("\n--- Auction state ---")
+print(f"\n--- Auction state (manche {manche}) ---")
 bid2.display2()
 
 result = bid2.find_lowest_unique()
