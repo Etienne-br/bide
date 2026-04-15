@@ -1,5 +1,5 @@
 import csv
-
+#empty BST
 class Node:
     def __init__(self, price):
         self.data = price
@@ -13,17 +13,17 @@ class TreeBid:
         self.base_cost = base_cost
         self.alpha = alpha
 
-    def bid_cost(self, price):
+    def bid_cost(self, price):#alpha is the risk factor
         return self.base_cost + self.alpha / (price + 1)
 
-    def insert(self, name, price):
+    def insert(self, name, price):#sepates the prices in order from lowest to highest
         cost = self.bid_cost(price)
         if self.root is None:
             self.root = Node(price)
             self.root.bidders.append((name, cost))
             return
         current = self.root
-        while True:
+        while True:#appends the name and cost in order
             if price == current.data:
                 current.bidders.append((name, cost))
                 return
@@ -40,35 +40,38 @@ class TreeBid:
                     return
                 current = current.right
 
-    def load_from_csv(self, filepath, manche):
+    def load_from_csv(self, filepath, manche=None):#reads csv file, and inserts each individual players
         with open(filepath, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if int(row['manche']) == manche:
-                    name = row['joueur']
-                    price = int(row['prix'])
-                    if price!=0:
-                        self.insert(name, price)
-    def bid_sum(self, filepath, manche):
+                if manche is not None and int(row['manche']) != manche:
+                    continue
+                if int(row['prix']) == 0:
+                    continue
+                name = row['joueur']
+                price = int(row['prix'])
+                self.insert(name, price)
+    def bid_sum(self, filepath, manche=None):
         p=0
         with open(filepath, newline='', encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
-                if int(row['manche']) == manche:
-                    price = int(row['prix'])
-                    p+=self.bid_cost(price)
+                if manche is not None and int(row['manche']) != manche:
+                    continue
+                price = int(row['prix'])
+                p+=self.bid_cost(price)
             return p
-    def display2(self):
+    def display2(self):#displays from smallest to largest
         self._inorder(self.root)
 
-    def _inorder(self, node):
+    def _inorder(self, node):#inorder traversal left, parent, right
         if node:
             self._inorder(node.left)
             for name, cost in node.bidders:
                 print(f"  {name} bid {node.data} — bid cost: {cost:.2f}")
             self._inorder(node.right)
 
-    def find_lowest_unique(self):
+    def find_lowest_unique(self):#returns the lowest person with no repetitions
         return self._find_lowest_unique(self.root)
 
     def _find_lowest_unique(self, node):
@@ -82,7 +85,7 @@ class TreeBid:
         return self._find_lowest_unique(node.right)
 
 
-# --- Setup ---
+#setup
 while True:
     try:
         base_cost = float(input("Enter base cost: "))
