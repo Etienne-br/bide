@@ -46,10 +46,18 @@ class TreeBid:
             for row in reader:
                 if int(row['manche']) == manche:
                     name = row['joueur']
-                    if int(row["prix"])!=0:
-                        price = int(row['prix'])
+                    price = int(row['prix'])
+                    if price!=0:
                         self.insert(name, price)
-
+    def bid_sum(self, filepath, manche):
+        p=0
+        with open(filepath, newline='', encoding='utf-8') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if int(row['manche']) == manche:
+                    price = int(row['prix'])
+                    p+=self.bid_cost(price)
+            return p
     def display2(self):
         self._inorder(self.root)
 
@@ -105,6 +113,7 @@ while True:
 # --- Load from CSV ---
 bid2 = TreeBid(base_cost, alpha)
 bid2.load_from_csv(r"C:\Users\gfour\OneDrive\Desktop\pbl2\bide\APP_lowbid_data (1)\lowbid_multi_manches_500x40.csv", manche)
+print("Total bid: ",bid2.bid_sum(r"C:\Users\gfour\OneDrive\Desktop\pbl2\bide\APP_lowbid_data (1)\lowbid_multi_manches_500x40.csv", manche))
 
 # --- Results ---
 print(f"\n--- Auction state (manche {manche}) ---")
@@ -114,4 +123,4 @@ result = bid2.find_lowest_unique()
 if result:
     print(f"\nWinner: {result[1]} with bid {result[0]}")
 else:
-    print("\nNo winner — no unique bid found.")
+    print("\nNo winner — no unique bid found.") 
